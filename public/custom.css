@@ -1,0 +1,91 @@
+
+
+.dashboard {
+    border: 1px solid red;
+    position: absolute;
+    width: 900px;
+    min-height: 400px;
+    right: 0;
+    top: 0;
+}
+
+.screen {
+    position: relative;
+}
+ 
+.cart {
+    position: absolute;
+    right: 20px;
+    top: 60px;
+}
+
+.circle-btn {
+    text-align: center;
+    cursor: pointer;
+    outline: none;
+    font-size: 24px;
+    display:inline-block;
+    height: 120px;
+    width: 120px;
+    border-radius: 50%;
+    background-color: green;
+    color: #000;
+    border: 0;
+    box-shadow: 0 0 8px #999;
+    font-weight: bold;
+}
+
+.circle-btn.item {
+    height: 110px;
+    width: 110px;
+    background-color: red;
+    margin-top: 20px;
+    font-size: 14px;
+    margin-right: 10px !important
+}
+
+.circle-btn:hover {background-color: #3e8e41}
+  
+.circle-btn:active {
+  background-color: green;
+  box-shadow: 0 2px #666;
+  transform: translateY(2px);
+}
+
+.typeArea {
+    float: left;
+}
+
+.menuArea {
+    max-width: 360px;
+    float: left;
+    clear: both;
+}
+
+.priceArea {
+    margin: 25px 0;
+    float: left;
+    width: 100px;
+}
+
+.priceArea button {
+    width: 100px;
+    height: 100px;
+    font-size: 12px;
+    text-transform: capitalize;
+    background-color: yellow;
+    margin-bottom: 20px;
+    margin-right: 0 !important;
+}
+
+
+.table th, .table td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border: 1px solid #dee2e6;
+}
+
+.totalRow {
+    background-color: #000;
+    color: #fff;
+}
