@@ -17,6 +17,7 @@ firebase.initializeApp(firebaseConfig);
 var clientRef = '-M_Vbu4G9kH4-mUBwVMf';
 var menuObj;
 var miniCart = [];
+var finalCart = {};
 
 function fetchMenu() {
     firebase
@@ -60,6 +61,9 @@ function renderCart() {
 
     var total = '<tr class="totalRow"><td class="itemName">Total</td><td>' + totalQuant + '</td><td class="itemTotal">'+ totalPrice +'</td></tr>';
     cartDiv.append(total);
+    finalCart.totalQty = totalQuant;
+    finalCart.totalPrice = totalPrice;
+    finalCart.miniCart = miniCart;
 }
 
 function updateQuantity(obj) {
@@ -110,7 +114,7 @@ $(document).ready(function(){
         $.each(getItem[0].price, function(i, v){
             var btn = '';
             for (var key in v){
-                btn = '<button type="button" class="circle-btn mr-3 price" data-type="'+type+'" data-name="'+name+'" data-price="'+v[key]+'">'+ key + '<br>' +v[key]+ '</button>';
+                btn = '<button type="button" class="circle-btn mr-3 price" data-type="'+type+'" data-name="'+name+'" data-price="'+v[key]+'" data-size="'+key+'">'+ key + '<br>' +v[key]+ '</button>';
                 $priceArea.append(btn);
             }
         });
@@ -131,4 +135,32 @@ $(document).ready(function(){
         }
         renderCart();
     });
+
+    //Clear Cart
+    $('.clearCart').click(function(){
+        miniCart = [];
+        renderCart();
+    });
+
+    //Confirm the bill
+    $('.confirmBill').click(function(){
+        finalCart.invoice = Date.now();
+        finalCart.paymentType = $('.paymentType').find(':input:checked').val();
+        submitOrder(finalCart);
+    });
 });
+
+//submit Order
+function submitOrder(data) {
+    firebase
+    .app()
+    .database()
+    .ref(`/store/${clientRef}/pos/orders`)
+    .push(data)
+    .then(function (resp) {
+        miniCart = [];
+        finalCart = {};
+        $('.menuArea, .priceArea').html('');
+        renderCart();
+    });
+}

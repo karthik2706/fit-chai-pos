@@ -14,9 +14,13 @@
 }
  
 .cart {
-    position: absolute;
+    /* position: absolute;
     right: 20px;
-    top: 60px;
+    top: 60px; */
+    margin: 25px 0;
+    clear: both;
+    float: left;
+    width: 100%;
 }
 
 .circle-btn {
@@ -25,8 +29,8 @@
     outline: none;
     font-size: 24px;
     display:inline-block;
-    height: 120px;
-    width: 120px;
+    height: 100px;
+    width: 100px;
     border-radius: 50%;
     background-color: green;
     color: #000;
@@ -36,8 +40,8 @@
 }
 
 .circle-btn.item {
-    height: 110px;
-    width: 110px;
+    height: 100px;
+    width: 100px;
     background-color: red;
     margin-top: 20px;
     font-size: 14px;
@@ -65,7 +69,7 @@
 .priceArea {
     margin: 25px 0;
     float: left;
-    width: 100px;
+    max-width: 360px;
 }
 
 .priceArea button {
@@ -74,8 +78,6 @@
     font-size: 12px;
     text-transform: capitalize;
     background-color: yellow;
-    margin-bottom: 20px;
-    margin-right: 0 !important;
 }
 
 
