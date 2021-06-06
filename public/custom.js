@@ -18,6 +18,7 @@ var clientRef = '-M_Vbu4G9kH4-mUBwVMf';
 var menuObj;
 var miniCart = [];
 var finalCart = {};
+window.ordersData = [];
 
 function fetchMenu() {
     firebase
@@ -80,6 +81,15 @@ $(document).ready(function(){
     
     var $menuArea = $('.menuArea');
     var $priceArea = $('.priceArea');
+
+    //Calender Plugin
+    $("#fromdatepicker").datepicker({
+        dateFormat: "dd-mm-yy",
+    });
+
+    $("#todatepicker").datepicker({
+        dateFormat: "dd-mm-yy",
+    });
 
     $('.item-type').click(function(){
         var items;
@@ -148,7 +158,48 @@ $(document).ready(function(){
         finalCart.paymentType = $('.paymentType').find(':input:checked').val();
         submitOrder(finalCart);
     });
+    fetchOrders();
+
+    $('.getOrders').click(function(){
+        var filters = {};
+        $('.reports')
+        .find(":input")
+        .not("button")
+        .each(function () {
+            filters[this.name] = $(this).val();
+        });
+        
+        var startDate = new Date(formateDate(filters.fromdatepicker));
+        var endDate;
+
+        var next = filters.fromdatepicker.split('-');
+        next[0] = (Number(next[0]) + 1) + '';
+        var nextDate = next.join('-');
+        
+
+        if (formateDate(filters.todatepicker) == "null") {
+          endDate = new Date(formateDate(nextDate));
+        } else {
+          endDate = new Date(formateDate(filters.todatepicker));
+        }
+
+        var resultProductData = window.ordersData.filter(function (order) {
+          var date = new Date(order.invoice);
+          return date >= startDate && date <= endDate;
+        });
+    });
 });
+
+ //convert date
+ function formateDate(date) {
+    if (date && date.length) {
+      var dateArr = date.split("-");
+      dateArr.reverse();
+      return dateArr.join("-");
+    } else {
+      return "null";
+    }
+  }
 
 //submit Order
 function submitOrder(data) {
@@ -164,3 +215,18 @@ function submitOrder(data) {
         renderCart();
     });
 }
+
+//Fetch Orders
+function fetchOrders() {
+    firebase
+      .app()
+      .database()
+      .ref(`/store/${clientRef}/pos/orders`)
+      .once("value")
+      .then((snapshot) => {
+        orders = snapshot.val();
+        $.each(orders, function(){
+            window.ordersData.push(this);
+        });
+      });
+  }
