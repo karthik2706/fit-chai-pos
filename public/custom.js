@@ -38,7 +38,7 @@ function renderCart() {
   var cartDiv = $(".cart table tbody");
   cartDiv.html("");
 
-  if (miniCart.length) {
+  if (miniCart && miniCart.length) {
     cart.find(".message").hide();
     cart.find(".heading").show();
   } else {
@@ -265,6 +265,7 @@ $(document).ready(function () {
     }
 
     var resultProductData;
+    window.ordersData = [];
 
     firebase
     .app()
@@ -277,6 +278,7 @@ $(document).ready(function () {
       $.each(orders, function (key) {
         this.key = key;
         OrderObj.push(this);
+        window.ordersData.push(this); // needed to fetch order details.
       });
       
       resultProductData = OrderObj.filter(function (order) {
@@ -299,7 +301,7 @@ $(document).ready(function () {
 
   //Render orders table
   function renderOrdersTable(data) {
-    console.log(data)
+    // console.log(data)
     var cardObj = [];
     var cashObj = [];
 
@@ -331,7 +333,7 @@ $(document).ready(function () {
       data: data,
       createdRow: function (row, data) {
         $(row).attr({
-          "data-order-id": data.key,
+          "data-order-id": data.invoice,
         });
       },
       columns: [
@@ -355,7 +357,7 @@ $(document).ready(function () {
         {
           data: "miniCart",
           render: function () {
-            return '<button class="btn btn-primary order-link" data-toggle="modal" data-target="#orderDetails">Order Details</button>&nbsp;&nbsp;&nbsp;';
+            return '<button class="btn btn-primary order-link" data-toggle="modal" data-target="#orderDetails">Details</button>&nbsp;&nbsp;&nbsp;';
           },
         },
       ],
@@ -481,33 +483,33 @@ function submitOrder(data) {
 }
 
 //Fetch Orders
-function fetchOrders() {
-  firebase
-    .app()
-    .database()
-    .ref(`/store/${clientRef}/pos/orders`)
-    .once("value")
-    .then((snapshot) => {
-      orders = snapshot.val();
-      $.each(orders, function (key) {
-        this.key = key;
-        window.ordersData.push(this);
-      });
-    });
-}
+// function fetchOrders() {
+//   firebase
+//     .app()
+//     .database()
+//     .ref(`/store/${clientRef}/pos/orders`)
+//     .once("value")
+//     .then((snapshot) => {
+//       orders = snapshot.val();
+//       $.each(orders, function (key) {
+//         this.key = key;
+//         window.ordersData.push(this);
+//       });
+//     });
+// }
 
 //Fetch Expenses
-function fetchExpenses() {
-  firebase
-    .app()
-    .database()
-    .ref(`/store/${clientRef}/pos/expenses`)
-    .once("value")
-    .then((snapshot) => {
-      orders = snapshot.val();
-      $.each(orders, function (key) {
-        this.key = key;
-        window.expensesData.push(this);
-      });
-    });
-}
+// function fetchExpenses() {
+//   firebase
+//     .app()
+//     .database()
+//     .ref(`/store/${clientRef}/pos/expenses`)
+//     .once("value")
+//     .then((snapshot) => {
+//       orders = snapshot.val();
+//       $.each(orders, function (key) {
+//         this.key = key;
+//         window.expensesData.push(this);
+//       });
+//     });
+// }
