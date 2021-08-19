@@ -120,10 +120,10 @@ $(document).ready(function () {
       items = menuObj.filter(function (order) {
         return order.type == type;
       });
-
+ 
       $.each(items, function () {
         var btn =
-          '<button type="button" class="circle-btn mr-3 item" data-type="' +
+          '<button type="button" class="circle-btn item" data-type="' +
           type +
           '" data-name="' +
           this.name +
@@ -225,9 +225,16 @@ $(document).ready(function () {
     finalCart.paymentType = $(".paymentType").find(":input:checked").val();
     submitOrder(finalCart);
   });
-  fetchOrders();
 
+  //Get reports
   $(".getOrders").click(function () {
+
+    //Fetch orders and expenses
+    // fetchOrders();
+    // fetchExpenses();
+
+    var reportType = $('.expenseType').val();
+
     var filters = {};
     $(".reports")
       .find(":input")
@@ -239,6 +246,10 @@ $(document).ready(function () {
     if ($.fn.DataTable.isDataTable("#reports")) {
         $("#reports").DataTable().destroy();
     }
+
+    if ($.fn.DataTable.isDataTable("#expenses")) {
+      $("#expenses").DataTable().destroy();
+  }
 
     var startDate = new Date(formateDate(filters.fromdatepicker));
     var endDate;
@@ -253,15 +264,46 @@ $(document).ready(function () {
       endDate = new Date(formateDate(filters.todatepicker));
     }
 
-    var resultProductData = window.ordersData.filter(function (order) {
-      var date = new Date(order.invoice);
-      return date >= startDate && date <= endDate;
-    });
+    var resultProductData;
 
+    firebase
+    .app()
+    .database()
+    .ref(`/store/${clientRef}/pos/`+reportType)
+    .once("value")
+    .then((snapshot) => {
+      orders = snapshot.val();
+      var OrderObj = [];
+      $.each(orders, function (key) {
+        this.key = key;
+        OrderObj.push(this);
+      });
+      
+      resultProductData = OrderObj.filter(function (order) {
+        var date = new Date(Number(order.invoice));
+        return date >= startDate && date <= endDate;
+      });
+
+      if(reportType === 'orders') {
+        renderOrdersTable(resultProductData);
+        $("#expenses").hide();
+        $("#reports").show();
+      } else {
+        renderExpensesTable(resultProductData);
+        $("#expenses").show();
+        $("#reports").hide();
+      }
+      
+    });
+  });
+
+  //Render orders table
+  function renderOrdersTable(data) {
+    console.log(data)
     var cardObj = [];
     var cashObj = [];
 
-    resultProductData.filter(function (order) {
+    data.filter(function (order) {
       if (order.paymentType == "card") {
         cardObj.push(order);
       } else {
@@ -269,17 +311,15 @@ $(document).ready(function () {
       }
     });
 
-
     var cardTotalPrice = 0;
     $.each(cardObj, function () {
       cardTotalPrice = cardTotalPrice + this.totalPrice;
     });
-    // console.log(cardTotalPrice);
+
     var cashTotalPrice = 0;
     $.each(cashObj, function () {
       cashTotalPrice = cashTotalPrice + this.totalPrice;
     });
-    // console.log(cashTotalPrice);
 
     $(".totalBoard").find(".card-total").html(cardTotalPrice);
     $(".totalBoard").find(".cash-total").html(cashTotalPrice);
@@ -288,10 +328,10 @@ $(document).ready(function () {
       .html(cardTotalPrice + cashTotalPrice);
 
     var reports = $("#reports").DataTable({
-      data: resultProductData,
+      data: data,
       createdRow: function (row, data) {
         $(row).attr({
-          "data-order-id": data.invoice,
+          "data-order-id": data.key,
         });
       },
       columns: [
@@ -320,8 +360,82 @@ $(document).ready(function () {
         },
       ],
     });
+  }
+
+  //Render expenses table
+  function renderExpensesTable(data) {
+
+    var cardTotalPrice = 0;
+    $.each(data, function () {
+      cardTotalPrice = cardTotalPrice + Number(this.expenseAmount);
+    });
+
+    $('.expenses-total').html(cardTotalPrice);
+
+    var reports = $("#expenses").DataTable({
+      data: data,
+      createdRow: function (row, data) {
+        $(row).attr({
+          "data-order-id": data.key,
+        });
+      },
+      columns: [
+        {
+          data: "invoice",
+          render: function (data) {
+            data = Number(data);
+            var date = moment(data).format("DD-MM-YY");
+            return date;
+          },
+        },
+        {
+          data: "invoice",
+          render: function (data) {
+            data = Number(data);
+            var time = moment(data).format("h:mm a");
+            return time;
+          },
+        },
+        { data: "expenseName" },
+        { data: "expenseAmount" },
+      ],
+    });
+  }
+
+  //Expense Submit Form
+  $('.expenses-form').on('submit', function(e){
+    e.preventDefault();
+    var expenseTime = Date.now();
+    var $form = $(this);
+    $form.find('.expense-time').val(expenseTime);
+    var formData = getFormData($form);
+    submitExpenses(formData);
   });
 });
+
+//Form data in json
+function getFormData($form){
+  var unindexed_array = $form.serializeArray();
+  var indexed_array = {};
+
+  $.map(unindexed_array, function(n, i){
+      indexed_array[n['name']] = n['value'];
+  });
+
+  return indexed_array;
+}
+
+//submit Expenses
+function submitExpenses(data) {
+  firebase
+    .app()
+    .database()
+    .ref(`/store/${clientRef}/pos/expenses`)
+    .push(data)
+    .then(function (resp) {
+      $('.expenses-form')[0].reset();
+    });
+}
 
 //convert date
 function formateDate(date) {
@@ -378,6 +492,22 @@ function fetchOrders() {
       $.each(orders, function (key) {
         this.key = key;
         window.ordersData.push(this);
+      });
+    });
+}
+
+//Fetch Expenses
+function fetchExpenses() {
+  firebase
+    .app()
+    .database()
+    .ref(`/store/${clientRef}/pos/expenses`)
+    .once("value")
+    .then((snapshot) => {
+      orders = snapshot.val();
+      $.each(orders, function (key) {
+        this.key = key;
+        window.expensesData.push(this);
       });
     });
 }
