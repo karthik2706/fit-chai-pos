@@ -513,3 +513,9 @@ function submitOrder(data) {
 //       });
 //     });
 // }
+
+
+window.onload = function(){
+  $('#fromdatepicker').datepicker('setDate', 'today');
+  $('.getOrders').click();
+}
