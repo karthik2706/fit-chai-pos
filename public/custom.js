@@ -103,11 +103,11 @@ $(document).ready(function () {
 
   //Calender Plugin
   $("#fromdatepicker").datepicker({
-    dateFormat: "dd-mm-yy",
+    dateFormat: "dd-mm-yy"
   });
 
   $("#todatepicker").datepicker({
-    dateFormat: "dd-mm-yy",
+    dateFormat: "dd-mm-yy"
   });
 
   $(".item-type").click(function () {
@@ -516,6 +516,9 @@ function submitOrder(data) {
 
 
 window.onload = function(){
-  $('#fromdatepicker').datepicker('setDate', 'today');
-  $('.getOrders').click();
+  var date = moment(new Date()).format("DD-MM-YYYY");
+  $('#fromdatepicker').val(date);
+  setTimeout(function(){
+    $('.getOrders').click();
+  }, 1);
 }
